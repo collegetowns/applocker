@@ -288,6 +288,27 @@ nav.tabs a.dir-link:hover{color:#ffd877;background:rgba(242,193,78,.08)}
 .dir-suggest a{color:#f2c14e;font-weight:600}
 .dir-suggest a:hover{text-decoration:underline}
 .suggest{padding:0 24px 56px;scroll-margin-top:12px}
+.sbox{display:block;position:relative;margin:0 auto;width:min(380px,100%);padding:28px 26px 18px;border:0;border-radius:6px;cursor:pointer;text-align:center;font:inherit;
+  background:linear-gradient(90deg,var(--door-hi),var(--door) 18%,var(--door) 82%,var(--door-lo));
+  box-shadow:0 0 0 6px var(--frame),0 18px 28px -14px rgba(10,14,40,.55);transition:transform .15s}
+.sbox:hover{transform:translateY(-2px)}
+.sbox:focus-visible{outline:3px solid #f2c14e;outline-offset:8px}
+.sbox-slot{display:block;width:62%;height:12px;margin:0 auto 18px;border-radius:6px;background:#0b0f2a;box-shadow:inset 0 3px 4px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.14)}
+.sbox-plate{display:block;background:#f6f8fb;border-radius:3px;padding:11px 12px 10px;box-shadow:0 2px 0 rgba(0,0,0,.25),inset 0 0 0 2px #d7dee8}
+.sbox-title{display:block;font-family:"Versa","Fira Sans",sans-serif;font-size:23px;letter-spacing:.08em;color:var(--navy)}
+.sbox-sub{display:block;margin-top:4px;font-size:14px;color:var(--ink-soft)}
+.sbox-cta{display:inline-block;margin-top:14px;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.sbox:hover .sbox-cta{color:#fff}
+.sbox .when-open{display:none}
+.sbox[aria-expanded="true"] .when-open{display:inline}
+.sbox[aria-expanded="true"] .when-closed{display:none}
+.rv{position:absolute;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e6ebf2,#7d8aa0);box-shadow:0 1px 1px rgba(0,0,0,.4)}
+.rv.tl{top:9px;left:9px}.rv.tr{top:9px;right:9px}.rv.bl{bottom:9px;left:9px}.rv.br{bottom:9px;right:9px}
+.sug-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s ease}
+.sug-panel.open{grid-template-rows:1fr}
+.sug-inner{min-height:0;overflow:hidden}
+.sug-panel .sug-card{margin:26px auto 8px}
+@media (prefers-reduced-motion:reduce){.sug-panel{transition:none}}
 .sug-card{max-width:760px;margin:0 auto;background:#fff;border:1px solid var(--rule);border-top:6px solid var(--navy);border-radius:6px;padding:26px 28px 24px;box-shadow:0 10px 24px -18px rgba(10,14,40,.5)}
 .sug-card h2{margin:0 0 6px;font-family:"Versa","Fira Sans",sans-serif;font-weight:400;font-size:26px;letter-spacing:.08em;color:var(--navy)}
 .sug-card > p{margin:0 0 18px;color:var(--ink-soft);font-size:16px;line-height:1.5}
@@ -372,9 +393,16 @@ footer.appeal{background:var(--footer);padding:48px 24px 40px;text-align:center}
   </div>
 </section>
 
-<section class="suggest" id="suggest" aria-labelledby="sugTitle">
-  <div class="sug-card">
-    <h2 id="sugTitle">&#128236; SUGGEST AN APP</h2>
+<section class="suggest" id="suggest" aria-label="Suggestion box">
+  <button class="sbox" id="sugToggle" type="button" aria-expanded="false" aria-controls="sugPanel">
+    <span class="rv tl"></span><span class="rv tr"></span><span class="rv bl"></span><span class="rv br"></span>
+    <span class="sbox-slot" aria-hidden="true"></span>
+    <span class="sbox-plate"><span class="sbox-title">SUGGESTION BOX</span><span class="sbox-sub">Have an idea for an app? Drop it in.</span></span>
+    <span class="sbox-cta"><span class="when-closed">Open &#9662;</span><span class="when-open">Close &#9652;</span></span>
+  </button>
+  <div class="sug-panel" id="sugPanel">
+    <div class="sug-inner">
+      <div class="sug-card">
     <p>Have an idea for a tool, a classroom activity or a parody that belongs in the App Locker? Send it in. Every suggestion gets read.</p>
     <form id="sugForm" class="sugform">
       <label class="wide">App idea* <input name="idea" required placeholder="e.g. A campus parking ticket generator"></label>
@@ -388,6 +416,8 @@ footer.appeal{background:var(--footer);padding:48px 24px 40px;text-align:center}
       <input name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute;left:-5000px" aria-hidden="true">
       <div class="wide"><button class="btn" type="submit">Send suggestion</button> <span id="sugMsg" class="sugmsg" role="status"></span></div>
     </form>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -623,9 +653,21 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal()
 document.addEventListener("click", e => {
   if (e.target.closest("[data-suggest]")){
     e.preventDefault();
+    setSug(true);
     document.getElementById("suggest").scrollIntoView({behavior:"smooth", block:"start"});
   }
 });
+
+/* Suggestion box: rolls the form open and closed */
+const sugToggle = document.getElementById("sugToggle"), sugPanel = document.getElementById("sugPanel");
+function setSug(open){
+  sugPanel.classList.toggle("open", open);
+  sugToggle.setAttribute("aria-expanded", open);
+  sugPanel.inert = !open;
+  if (open) setTimeout(() => { const f = sugPanel.querySelector("input[name=idea]"); if (f) f.focus({preventScroll:true}); }, 500);
+}
+setSug(false);
+sugToggle.addEventListener("click", () => setSug(!sugPanel.classList.contains("open")));
 
 /* Suggest an app: opens the visitor's Gmail or email app with the suggestion filled in */
 const SUGGEST_TO = "bW9jLmxpYW1nQHJla2NvbHBwYSs1NTVuZWxsYW1uYXly"; /* the inbox address, lightly encoded */
