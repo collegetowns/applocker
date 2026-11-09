@@ -442,7 +442,7 @@ const APPS = [
     blurb:"An Onion-style front page for Greater Boston's college towns, with headlines, a newswire and cartoons." },
   { title:"Jobweek", category:"parody", for:["Anyone with receipts"], url:"https://jobweek.collegetowns.org", image:IMG["jobweek"],
     blurb:"A parody of expense-report software. Drop in your dumb receipts, say what they were for, and get a form with every little box filled in. Payable in play money." },
-  { title:"Coming Soon: World War II App", category:"parody", status:"soon", mono:"WWII", color:"#4a5230",
+  { title:"World War II App", category:"parody", status:"soon", mono:"WWII", color:"#4a5230",
     blurb:"Something is being drafted. Report back later." },
 
   { title:"Adaptive Reuse Corner", category:"urbanism", for:["Everyone"], url:"https://adaptivereusecorner.collegetowns.org", image:IMG["adaptivereusecorner"],
@@ -521,7 +521,7 @@ document.getElementById("dirCols").innerHTML = WINGS.map(w => `<div class="dir-w
   ${w.lockers.map(L => {
     const apps = APPS.filter(a => a.category === L.key);
     return `<div class="dir-locker"><h4>${esc(L.name)}<span>${esc(L.no)}</span></h4><ul>${apps.map(a =>
-      `<li><a href="#app-${slug(a.title)}"><span>${esc(a.title)}</span>${isSoon(a) ? '<span class="tag">Soon</span>' : isVideo(a) ? '<span class="tag">Video</span>' : '<span class="tag live">Free</span>'}</a></li>`).join("")}</ul></div>`;
+      `<li><a href="#app-${slug(a.title)}"><span>${esc(a.title)}</span>${isSoon(a) ? '<span class="tag">Coming soon</span>' : isVideo(a) ? '<span class="tag">Video</span>' : '<span class="tag live">Free</span>'}</a></li>`).join("")}</ul></div>`;
   }).join("")}
 </div>`).join("");
 
