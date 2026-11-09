@@ -36,7 +36,7 @@ The "Suggest an App" form opens the visitor's Gmail or email app with the sugges
 
 ## Visitor counter
 
-Not set up yet. To add a private counter, create a free [GoatCounter](https://www.goatcounter.com) site and paste its one-line script where `index.html` says `Private visitor counter`.
+Visits are counted privately with [GoatCounter](https://collegetowns.goatcounter.com) (sign in to see them). Pages are recorded with the site name in front, e.g. `applocker.collegetowns.org/`.
 
 ## Credits
 
