@@ -314,6 +314,15 @@ nav.tabs a.dir-link:hover{color:#ffd877;background:rgba(242,193,78,.08)}
 .sug-card > p{margin:0 0 18px;color:var(--ink-soft);font-size:16px;line-height:1.5}
 .sugform{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
 .sugform .wide{grid-column:1 / -1}
+.sugform [hidden]{display:none}
+.kind{border:0;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kind legend{padding:0;margin-bottom:8px;font-weight:600;font-size:14.5px;color:#2d3c4f}
+.sugform .kind-opt{flex-direction:row;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #c5d0de;border-radius:8px;background:#fbfdff;cursor:pointer}
+.sugform .kind-opt input{margin:3px 0 0;accent-color:var(--navy)}
+.kind-opt span{display:flex;flex-direction:column;gap:2px}
+.kind-opt strong{color:var(--navy)}
+.kind-opt:has(input:checked){border-color:var(--navy);background:#eef3fa;box-shadow:0 0 0 3px rgba(22,28,69,.1)}
+@media (max-width:640px){.kind{grid-template-columns:1fr}}
 .sugform label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14.5px;color:#2d3c4f}
 .sugform small{font-weight:400;color:var(--meta)}
 .sugform input,.sugform textarea,.sugform select{font:inherit;font-weight:400;font-size:16px;color:var(--ink);padding:9px 11px;border:1.5px solid #c5d0de;border-radius:6px;background:#fbfdff}
@@ -397,20 +406,30 @@ footer.appeal{background:var(--footer);padding:48px 24px 40px;text-align:center}
   <button class="sbox" id="sugToggle" type="button" aria-expanded="false" aria-controls="sugPanel">
     <span class="rv tl"></span><span class="rv tr"></span><span class="rv bl"></span><span class="rv br"></span>
     <span class="sbox-slot" aria-hidden="true"></span>
-    <span class="sbox-plate"><span class="sbox-title">SUGGESTION BOX</span><span class="sbox-sub">Have an idea for an app? Drop it in.</span></span>
+    <span class="sbox-plate"><span class="sbox-title">SUGGESTION BOX</span><span class="sbox-sub">A new app idea, or a fix? Drop it in.</span></span>
     <span class="sbox-cta"><span class="when-closed">Open &#9662;</span><span class="when-open">Close &#9652;</span></span>
   </button>
   <div class="sug-panel" id="sugPanel">
     <div class="sug-inner">
       <div class="sug-card">
-    <p>Have an idea for a tool, a classroom activity or a parody that belongs in the App Locker? Send it in. Every suggestion gets read.</p>
+    <p>Have an idea for a new app, or spotted something to fix or add in one that's already here? Send it in. Every suggestion gets read.</p>
     <form id="sugForm" class="sugform">
-      <label class="wide">App idea* <input name="idea" required placeholder="e.g. A campus parking ticket generator"></label>
-      <label class="wide">What should it do?* <textarea name="what" rows="3" required placeholder="A sentence or two"></textarea></label>
-      <label>Who is it for?
+      <fieldset class="wide kind">
+        <legend>What are you suggesting?</legend>
+        <label class="kind-opt"><input type="radio" name="kind" value="new" checked><span><strong>A new app</strong><small>An idea for the locker</small></span></label>
+        <label class="kind-opt"><input type="radio" name="kind" value="fix"><span><strong>A fix or addition</strong><small>For an app already here</small></span></label>
+      </fieldset>
+      <label class="wide" data-kind="new">App idea* <input name="idea" required placeholder="e.g. A campus parking ticket generator"></label>
+      <label class="wide" data-kind="new">What should it do?* <textarea name="what" rows="3" required placeholder="A sentence or two"></textarea></label>
+      <label data-kind="new">Who is it for?
         <select name="who"><option value="">Choose one</option><option>Instructors</option><option>Students</option><option>Researchers</option><option>Everyone</option></select></label>
-      <label>Which wing?
+      <label data-kind="new">Which wing?
         <select name="wing"><option value="">Not sure</option><option>Education</option><option>Urbanism</option><option>Other</option></select></label>
+      <label data-kind="fix" hidden>Which app?*
+        <select name="app" required disabled><option value="">Choose an app</option></select></label>
+      <label data-kind="fix" hidden>Type of suggestion
+        <select name="fixtype" disabled><option>Something's broken</option><option>Add a feature</option><option>Wording or content</option><option>Other</option></select></label>
+      <label class="wide" data-kind="fix" hidden>What should change?* <textarea name="change" rows="3" required disabled placeholder="What happened, what you expected, or what you'd like added"></textarea></label>
       <label><span>Your name <small>(optional)</small></span><input name="name"></label>
       <label><span>Your email <small>(optional, for a reply)</small></span><input name="email" type="email"></label>
       <input name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute;left:-5000px" aria-hidden="true">
@@ -669,6 +688,21 @@ function setSug(open){
 setSug(false);
 sugToggle.addEventListener("click", () => setSug(!sugPanel.classList.contains("open")));
 
+/* New app vs. fix/addition: show the matching fields; the app list comes from APPS */
+const sugForm = document.getElementById("sugForm");
+sugForm.elements.app.insertAdjacentHTML("beforeend",
+  APPS.filter(a => !isSoon(a)).map(a => `<option>${esc(a.title)}</option>`).join(""));
+function setKind(kind){
+  sugForm.querySelectorAll("[data-kind]").forEach(el => {
+    const on = el.dataset.kind === kind;
+    el.hidden = !on;
+    el.querySelectorAll("input,select,textarea").forEach(c => c.disabled = !on);
+  });
+  document.getElementById("sugMsg").innerHTML = "";
+}
+sugForm.addEventListener("change", e => { if (e.target.name === "kind") setKind(e.target.value); });
+setKind("new");
+
 /* Suggest an app: opens the visitor's Gmail or email app with the suggestion filled in */
 const SUGGEST_TO = "bW9jLmxpYW1nQHJla2NvbHBwYSs1NTVuZWxsYW1uYXly"; /* the inbox address, lightly encoded */
 const decMail = s => { try { return atob(s).split("").reverse().join(""); } catch(e){ return ""; } };
@@ -677,10 +711,13 @@ document.getElementById("sugForm").addEventListener("submit", e => {
   const f = e.target, v = n => f.elements[n].value.trim(), msg = document.getElementById("sugMsg");
   if (v("_gotcha")) return;
   const to = decMail(SUGGEST_TO);
-  const subject = "App Locker suggestion: " + v("idea");
-  const body = ["App idea: " + v("idea"), "What it should do: " + v("what"),
-    "Who it's for: " + (v("who") || "(not given)"), "Wing: " + (v("wing") || "Not sure"),
-    "Suggested by: " + (v("name") || "(anonymous)"), "Reply to: " + (v("email") || "(not given)")].join("\n");
+  const isFix = f.elements.kind.value === "fix";
+  const who = ["Suggested by: " + (v("name") || "(anonymous)"), "Reply to: " + (v("email") || "(not given)")];
+  const subject = isFix ? "App Locker fix/addition: " + v("app") : "App Locker suggestion: " + v("idea");
+  const body = (isFix
+    ? ["App: " + v("app"), "Type: " + v("fixtype"), "What should change: " + v("change")]
+    : ["App idea: " + v("idea"), "What it should do: " + v("what"),
+       "Who it's for: " + (v("who") || "(not given)"), "Wing: " + (v("wing") || "Not sure")]).concat(who).join("\n");
   const gmail = "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(to) + "&su=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
   const mailto = "mailto:" + encodeURIComponent(to) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
   msg.innerHTML = `Almost done! Open your email, then press <strong>Send</strong>:<br>
